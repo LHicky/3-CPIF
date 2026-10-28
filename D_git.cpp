@@ -1,43 +1,77 @@
 #include <bits/stdc++.h>
-// A biblioteca bits inclui tudo o que È padr„o no C++.
+// A biblioteca bits inclui tudo o que √© padr√£o no C++.
 
 using namespace std;
 
 /*
     O problema descreve ciclos de tempo repetitivos. Um ciclo completo consiste em dar aula por N minutos 
     e descansar por X minutos. 
-    A duraÁ„o de um ciclo completo È (N + X) minutos.
-    Para n„o fazer um loop que subtrai o tempo aos poucos (o que daria "Time Limit Exceeded" devido ao tamanho de A), 
-    usamos matem·tica b·sica para descobrir quantos ciclos completos cabem no tempo total A, e depois olhamos para a sobra.
+    A dura√ß√£o de um ciclo completo √© (N + X) minutos.
+    Para n√£o fazer um loop que subtrai o tempo aos poucos (o que daria "Time Limit Exceeded" devido ao tamanho de A), 
+    usamos matem√°tica b√°sica para descobrir quantos ciclos completos cabem no tempo total A, e depois olhamos para a sobra.
+*/
+
+
+/*
+    ERROS COMUNS QUE DERRUBARAM OS COMPETIDORES NESTE PROBLEMA:
+    
+    1. Estouro de Limite de Vari√°vel (Integer Overflow)
+       Muitos tentaram declarar 'A' como um 'int' normal. 
+       Um 'int' em C++ suporta valores at√© aproximadamente 2 bilh√µes (2 * 10^9). 
+       Como as restri√ß√µes dizem que 'A' pode chegar a 10^18, o valor simplesmente 
+       n√£o cabe na mem√≥ria de um 'int', gerando um n√∫mero negativo aleat√≥rio ou 
+       cortando o valor. Usar 'long long' era obrigat√≥rio.
+       
+    2. Simula√ß√£o Passo a Passo (Time Limit Exceeded - TLE)
+       Quem n√£o percebeu a l√≥gica da divis√£o e do resto (m√≥dulo), geralmente tenta 
+       resolver o problema com um la√ßo de repeti√ß√£o, simulando minuto a minuto ou 
+       ciclo a ciclo, algo como:
+       while (A > 0) {
+           total += min(N, A);
+           A -= (N + X);
+       }
+       Se A for 10^18 e os ciclos forem curtos, esse 'while' vai rodar trilh√µes 
+       de vezes. O juiz autom√°tico tem um limite de tempo (geralmente 1 segundo, 
+       o que permite cerca de 10^8 opera√ß√µes). O c√≥digo com la√ßo estoura o tempo 
+       limite e recebe um TLE, enquanto a solu√ß√£o matem√°tica roda em O(1).
+
+	3.	Alguns competidores tentaram calcular ciclos inteiros e imprimir m√∫ltiplos exatos de N (ex: 'resultado = (A + X) / (N + X) * N').
+    	Isso passa nos testes do PDF, mas reprova porque as sobras. Se a aula acaba no meio de uma fala do 
+    	professor (ex: faltavam 5 minutos para ele ir dormir), esses 5 minutos teriam que ser somados pra n√£o serem perdidos.
+    
+    Al√©m disso, lembre-se: se voc√™ divide um 'long long' gigante por um n√∫mero pequeno, o resultado CONTINUA gigante.
+	Salvar essa resposta numa vari√°vel 'int' causa overflow silencioso
 */
 
 int main() {
     
-    // As restriÁıes do PDF indicam que o tempo total A pode chegar atÈ 10^18.
-    // Um 'int' normal de 32 bits sÛ suporta valores atÈ ~1 * 10^8. 
-    // Usar 'long long' (64 bits) È obrigatÛrio para evitar o estouro de memÛria (Overflow).
+    // As restri√ß√µes do PDF indicam que o tempo total A pode chegar at√© 10^18.
+    // Um 'int' normal de 32 bits s√≥ suporta valores at√© ~2 * 10^9. 
+    // Usar 'long long' (64 bits) √© obrigat√≥rio para evitar o estouro de mem√≥ria (Overflow).
     long long N, X, A;
     
     cin >> N >> X >> A;
     // Lendo os valores:
     // N = Tempo de aula antes de ficar exausto
     // X = Tempo de cochilo no carro
-    // A = DuraÁ„o total da aula
+    // A = Dura√ß√£o total da aula
     
     // Passo 1: Quantos ciclos completos aconteceram?
     // A / (N + X) pega o tempo total e divide pelo tamanho de um ciclo. 
-    // Como queremos saber o tempo de AULA nesses ciclos, multiplicamos esse n˙mero de ciclos por N.
+    // Como queremos saber o tempo de AULA nesses ciclos, multiplicamos esse n√∫mero de ciclos por N.
+    // Notem que a multiplica√ß√£o vem somente depois da divis√£o pra n√£o ter estouro da vari√°vel
     long long total = (A / (N + X)) * N;
     
-    // Passo 2: Qual foi a "sobra" de tempo apÛs todos esses ciclos completos?
-    // O operador % (mÛdulo) nos d· o resto da divis„o. 
+    // Passo 2: Qual foi a "sobra" de tempo ap√≥s todos esses ciclos completos?
+    // O operador % (m√≥dulo) nos d√° o resto da divis√£o. 
+    // Alguns esqueceram dessa parte foi quase...
     A %= (N + X);
     
     // Passo 3: Avaliar a sobra.
     // O professor vai tentar dar aula durante toda essa sobra (A). 
-    // Mas ele sÛ aguenta dar aula por N minutos seguidos.
-    // Portanto, o tempo que ele dar· de aula na sobra ser· o menor valor entre N e a prÛpria sobra A.
-    // A funÁ„o min(N, A) faz exatamente isso.
+    // Mas ele s√≥ aguenta dar aula por N minutos seguidos.
+    // Portanto, o tempo que ele dar√° de aula na sobra ser√° o menor valor entre N e a pr√≥pria sobra A.
+    // A fun√ß√£o min(N, A) faz exatamente isso ou um if pra pegar sempre o menos.
     total += min(N, A);
     
     // Imprime o resultado final e quebra a linha
@@ -63,14 +97,16 @@ int main() {
     
     Passo 3:
     O professor consegue dar aula por toda a sobra (55 mins)? 
-    N„o, o limite dele È N = 45 mins.
-    Ele d· aula por min(45, 55) = 45 minutos. E depois vai dormir os 10 finais.
+    N√£o, o limite dele √© N = 45 mins.
+    Ele d√° aula por min(45, 55) = 45 minutos. E depois vai dormir os 10 finais.
     Adicionamos 45 ao total: 45 + 45 = 90.
     
-    SaÌda = 90.
+    Sa√≠da = 90.
     
     // Complexidade:
-    // O(1) - Tempo constante. GraÁas ao uso da divis„o e do mÛdulo, n„o importa se A È 100 ou 10^18, 
-    // o programa sempre far· apenas 3 operaÁıes matem·ticas simples e imprimir· a resposta instantaneamente.
+    // O(1) - Tempo constante. Gra√ßas ao uso da divis√£o e do m√≥dulo, n√£o importa se A √© 100 ou 10^18, 
+    // o programa sempre far√° apenas 3 opera√ß√µes matem√°ticas simples e imprimir√° a resposta instantaneamente.
     */
+    
+    
 }
